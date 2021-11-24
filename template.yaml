@@ -30,7 +30,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /linter
+            Path: /lint/openapi
             Method: POST
     Metadata:
       BuildMethod: makefile
