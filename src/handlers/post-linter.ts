@@ -28,12 +28,27 @@ export const linter = async (
     return { statusCode: 405, body: null };
   }
 
-  const openapi = event.body?.length ? event.body : DEFAULT_RULESET;
-  const rulesUrl =
-    event.queryStringParameters.rulesUrl ||
-    "https://rules.linting.org/testing/base.yaml";
+  if (!event.body) {
+    return { statusCode: 400, body: null };
+  }
 
   let ruleset = DEFAULT_RULESET;
+  let openapi = {};
+
+  try {
+    // TODO: Support YAML.
+    openapi = JSON.parse(event.body);
+  } catch (err) {
+    console.error(`Could not parse request body: ${err.message}`);
+    return {
+      statusCode: 400,
+      body: null,
+    };
+  }
+
+  const rulesUrl =
+    event.queryStringParameters?.rulesUrl ||
+    "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
 
   try {
     const rulesetModule = await migrateRuleset(rulesUrl, {
@@ -43,31 +58,37 @@ export const linter = async (
 
     ruleset = requireFromString(rulesetModule);
   } catch (err) {
-    console.error(`Could not load ruleset from ${rulesUrl}, using default.`);
+    console.error(
+      `Could not load ruleset from ${rulesUrl}, using default. Error: ${err.message}`
+    );
   }
 
-  const spectral = new Spectral();
-  spectral.setRuleset(ruleset);
+  try {
+    const spectral = new Spectral();
+    spectral.setRuleset(ruleset);
 
-  const results = await spectral.run(openapi);
-  const failedCodes = results.map((r) => r.code);
-  const passedRules = Object.keys(spectral.ruleset.rules)
-    .filter((c) => !failedCodes.includes(c))
-    .map((c) => {
-      const rule = spectral.ruleset.rules[c];
-      return {
-        code: c,
-        message: rule.description,
-      };
-    });
+    const results = await spectral.run(openapi);
 
-  const response = {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-    },
-    body: JSON.stringify({ pass: passedRules, fail: results }),
-  };
+    const failedCodes = results.map((r) => r.code);
+    const passedRules = Object.keys(spectral.ruleset.rules)
+      .filter((c) => !failedCodes.includes(c))
+      .map((c) => {
+        const rule = spectral.ruleset.rules[c];
+        return {
+          code: c,
+          message: rule.description,
+        };
+      });
 
-  return response;
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify({ pass: passedRules, fail: results }),
+    };
+  } catch (err) {
+    console.error(`Failed to retrieve lint results: ${err.message}`);
+    return { statusCode: 500, body: null };
+  }
 };

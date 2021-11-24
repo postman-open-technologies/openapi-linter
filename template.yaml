@@ -17,7 +17,7 @@ Resources:
   postLinter:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/post-linter.linter
+      Handler: dist/handlers/post-linter.linter
       Runtime: nodejs14.x
       Architectures:
         - x86_64
