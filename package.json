@@ -8,12 +8,15 @@
     "@stoplight/spectral-functions": "^1.4.0",
     "@stoplight/spectral-ruleset-migrator": "^1.5.2",
     "aws-sdk": "^2.799.0",
+    "content-type-parser": "^1.0.2",
+    "js-yaml": "^4.1.0",
     "require-from-string": "^2.0.2",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.85",
     "@types/jest": "^27.0.3",
+    "@types/js-yaml": "^4.0.5",
     "@types/node": "^16.11.10",
     "@types/require-from-string": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",

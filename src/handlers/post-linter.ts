@@ -3,6 +3,8 @@ import "source-map-support/register";
 import { readFile } from "fs/promises";
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import contentTypeParser from "content-type-parser";
+import yaml from "js-yaml";
 import requireFromString from "require-from-string";
 
 import { migrateRuleset } from "@stoplight/spectral-ruleset-migrator";
@@ -28,7 +30,13 @@ export const linter = async (
     return { statusCode: 405, body: null };
   }
 
-  if (!event.body) {
+  const t = contentTypeParser(event.headers["Content-Type"]);
+
+  const isValidContent = ["application/json", "text/yaml"].includes(
+    `${t?.type}/${t?.subtype}`
+  );
+
+  if (!event.body || !isValidContent) {
     return { statusCode: 400, body: null };
   }
 
@@ -36,8 +44,7 @@ export const linter = async (
   let openapi = {};
 
   try {
-    // TODO: Support YAML.
-    openapi = JSON.parse(event.body);
+    openapi = yaml.load(event.body); // works with both JSON and YAML.
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
     return {
