@@ -8,7 +8,6 @@
     "@stoplight/spectral-functions": "^1.4.0",
     "@stoplight/spectral-ruleset-migrator": "^1.5.2",
     "aws-sdk": "^2.799.0",
-    "nimma": "^0.1.6",
     "require-from-string": "^2.0.2",
     "source-map-support": "^0.5.21"
   },
