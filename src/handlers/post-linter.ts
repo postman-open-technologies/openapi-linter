@@ -1,27 +1,15 @@
 import "source-map-support/register";
 
-import { readFile } from "fs/promises";
-
+import { URL } from "url";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import contentTypeParser from "content-type-parser";
+import fetch from "node-fetch";
 import yaml from "js-yaml";
-import requireFromString from "require-from-string";
+import { stdin as mockStdin } from "mock-stdin";
 
-import { migrateRuleset } from "@stoplight/spectral-ruleset-migrator";
-import { Spectral } from "@stoplight/spectral-core";
-import { truthy } from "@stoplight/spectral-functions";
-
-const DEFAULT_RULESET = {
-  rules: {
-    "no-empty-description": {
-      given: "$..description",
-      message: "Description must not be empty",
-      then: {
-        function: truthy,
-      },
-    },
-  },
-};
+import { lint } from "@stoplight/spectral-cli/dist/services/linter";
+import { getRuleset } from "@stoplight/spectral-cli/dist/services/linter/utils";
+import { OutputFormat } from "@stoplight/spectral-cli/dist/services/config";
 
 export const linter = async (
   event: APIGatewayProxyEvent
@@ -40,11 +28,12 @@ export const linter = async (
     return { statusCode: 400, body: null };
   }
 
-  let ruleset = DEFAULT_RULESET;
-  let openapi = {};
-
+  const stdin = mockStdin();
   try {
-    openapi = yaml.load(event.body); // works with both JSON and YAML.
+    const openapi = yaml.load(event.body); // works with both JSON and YAML.
+    console.log(JSON.stringify(openapi));
+    stdin.send(JSON.stringify(openapi));
+    stdin.end();
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
     return {
@@ -53,34 +42,69 @@ export const linter = async (
     };
   }
 
-  const rulesUrl =
+  let rulesUrl =
     event.queryStringParameters?.rulesUrl ||
     "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
 
+  let ruleset = null;
   try {
-    const rulesetModule = await migrateRuleset(rulesUrl, {
-      format: "commonjs",
-      fs: { promises: { readFile } }, // unused
-    });
+    const rulesetResponse = await fetch(rulesUrl);
+    const rulesetText = (await rulesetResponse.text()) || "";
+    let inputType = "";
 
-    ruleset = requireFromString(rulesetModule);
+    try {
+      JSON.parse(rulesetText);
+      inputType = "json";
+    } catch (_err) {
+      try {
+        yaml.load(rulesetText);
+        inputType = "yaml";
+      } catch (err) {
+        const errorMessage = `Rules URL returned an invalid format, requires JSON or YAML, ${rulesUrl}`;
+        console.error(errorMessage);
+        return {
+          statusCode: 400,
+          body: errorMessage,
+        };
+      }
+    }
+
+    // Spectral requires URLs to end in .json, .yaml, or .yml.
+    const testUrl = new URL(rulesUrl);
+    if (inputType === "json" && !rulesUrl.endsWith("json")) {
+      rulesUrl += testUrl.search ? "&hack=.json" : "?hack=.json";
+    } else if (
+      inputType === "yaml" &&
+      !rulesUrl.endsWith("yaml") &&
+      !rulesUrl.endsWith("yml")
+    ) {
+      rulesUrl += testUrl.search ? "&hack=.yaml" : "?hack=.yaml";
+    }
+
+    ruleset = await getRuleset(rulesUrl);
+    //console.log(JSON.stringify(ruleset));
   } catch (err) {
-    console.error(
-      `Could not load ruleset from ${rulesUrl}, using default. Error: ${err.message}`
-    );
+    console.error("cannot load ruleset:", err);
+    return;
   }
 
   try {
-    const spectral = new Spectral();
-    spectral.setRuleset(ruleset);
+    const results = await lint([0], {
+      format: OutputFormat.STYLISH,
+      encoding: "utf-8",
+      ignoreUnknownFormat: false,
+      failOnUnmatchedGlobs: true,
+      ruleset: rulesUrl,
+      stdinFilepath: "./openapi",
+    });
 
-    const results = await spectral.run(openapi);
+    stdin.restore();
 
     const failedCodes = results.map((r) => r.code);
-    const passedRules = Object.keys(spectral.ruleset.rules)
+    const passedRules = Object.keys(ruleset.rules)
       .filter((c) => !failedCodes.includes(c))
       .map((c) => {
-        const rule = spectral.ruleset.rules[c];
+        const rule = ruleset.rules[c];
         return {
           code: c,
           message: rule.description,
@@ -94,6 +118,13 @@ export const linter = async (
       },
       body: JSON.stringify({ pass: passedRules, fail: results }),
     };
+  } catch (err) {
+    console.error(
+      `Could not load ruleset from ${rulesUrl}, using default. Error: ${err.message}`
+    );
+  }
+
+  try {
   } catch (err) {
     console.error(`Failed to retrieve lint results: ${err.message}`);
     return { statusCode: 500, body: null };
