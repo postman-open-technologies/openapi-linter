@@ -1,0 +1,13 @@
+{
+    "rules": {
+      "no-empty-description": {
+        "message": "Description must not be empty",
+        "given": "$..description",
+        "then": [
+          {
+            "function": "truthy"
+          }
+        ]
+      }
+    }
+  }
