@@ -1,6 +1,14 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: openapi-linter
 
+Globals:
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'*'"
+      AllowCredentials: "'*'"
+
 Transform:
   - AWS::Serverless-2016-10-31
 
