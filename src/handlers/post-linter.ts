@@ -5,11 +5,17 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import contentTypeParser from "content-type-parser";
 import fetch from "node-fetch";
 import yaml from "js-yaml";
-import { stdin as mockStdin } from "mock-stdin";
 
-import { lint } from "@stoplight/spectral-cli/dist/services/linter";
-import { getRuleset } from "@stoplight/spectral-cli/dist/services/linter/utils";
 import { OutputFormat } from "@stoplight/spectral-cli/dist/services/config";
+import {
+  Document,
+  IRuleResult,
+  Ruleset,
+  Spectral,
+} from "@stoplight/spectral-core";
+import * as Parsers from "@stoplight/spectral-parsers";
+import { getRuleset } from "@stoplight/spectral-cli/dist/services/linter/utils";
+import { ILintConfig } from "@stoplight/spectral-cli/dist/services/config";
 
 export const linter = async (
   event: APIGatewayProxyEvent
@@ -28,12 +34,9 @@ export const linter = async (
     return { statusCode: 400, body: null };
   }
 
-  const stdin = mockStdin();
+  let openapi = {};
   try {
-    const openapi = yaml.load(event.body); // works with both JSON and YAML.
-    console.log(JSON.stringify(openapi));
-    stdin.send(JSON.stringify(openapi));
-    stdin.end();
+    openapi = yaml.load(event.body); // works with both JSON and YAML.
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
     return {
@@ -46,7 +49,6 @@ export const linter = async (
     event.queryStringParameters?.rulesUrl ||
     "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
 
-  let ruleset = null;
   try {
     const rulesetResponse = await fetch(rulesUrl);
     const rulesetText = (await rulesetResponse.text()) || "";
@@ -81,15 +83,14 @@ export const linter = async (
       rulesUrl += testUrl.search ? "&hack=.yaml" : "?hack=.yaml";
     }
 
-    ruleset = await getRuleset(rulesUrl);
-    //console.log(JSON.stringify(ruleset));
+    const ruleset = await getRuleset(rulesUrl);
   } catch (err) {
     console.error("cannot load ruleset:", err);
     return;
   }
 
   try {
-    const results = await lint([0], {
+    const [ruleset, results] = await lint(JSON.stringify(openapi), {
       format: OutputFormat.STYLISH,
       encoding: "utf-8",
       ignoreUnknownFormat: false,
@@ -98,25 +99,51 @@ export const linter = async (
       stdinFilepath: "./openapi",
     });
 
-    stdin.restore();
+    const failedCodes = results.map((r) => String(r.code));
+    const failures = results.reduce((prev, f) => {
+      const id = f.code;
+      prev[id] = prev[id] || [];
+      prev[id].push(f);
+      return prev;
+    }, {});
 
-    const failedCodes = results.map((r) => r.code);
-    const passedRules = Object.keys(ruleset.rules)
-      .filter((c) => !failedCodes.includes(c))
-      .map((c) => {
-        const rule = ruleset.rules[c];
-        return {
-          code: c,
-          message: rule.description,
-        };
-      });
+    const allResults = [];
+    for (const code of Object.keys(ruleset.rules)) {
+      const status = failedCodes.includes(code) ? "failed" : "passed";
+
+      const { description: message } = ruleset.rules[code];
+      let res = {
+        code,
+        status,
+        message,
+      };
+
+      if (status == "passed") {
+        allResults.push(res);
+        continue;
+      }
+
+      for (const f of failures[code]) {
+        const { message, path, severity, source, range } = f;
+        res = Object.assign({}, res, {
+          failure: {
+            message,
+            path,
+            severity,
+            source,
+            range,
+          },
+        });
+        allResults.push(res);
+      }
+    }
 
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
-      body: JSON.stringify({ pass: passedRules, fail: results }),
+      body: JSON.stringify(allResults),
     };
   } catch (err) {
     console.error(
@@ -129,4 +156,21 @@ export const linter = async (
     console.error(`Failed to retrieve lint results: ${err.message}`);
     return { statusCode: 500, body: null };
   }
+};
+
+const lint = async function (
+  source: string,
+  flags: ILintConfig
+): Promise<[Ruleset, IRuleResult[]]> {
+  const spectral = new Spectral();
+  const ruleset = await getRuleset(flags.ruleset);
+  spectral.setRuleset(ruleset);
+
+  const document = new Document(source, Parsers.Yaml, flags.ruleset);
+
+  const results: IRuleResult[] = await spectral.run(document, {
+    ignoreUnknownFormat: flags.ignoreUnknownFormat,
+  });
+
+  return [spectral.ruleset, results];
 };
