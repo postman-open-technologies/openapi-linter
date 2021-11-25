@@ -33,9 +33,8 @@ export const linter = async (
     return { statusCode: 400, body: null };
   }
 
-  let openapi = {};
   try {
-    openapi = yaml.load(event.body); // works with both JSON and YAML.
+    yaml.load(event.body); // works with both JSON and YAML.
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
     return {
@@ -65,7 +64,7 @@ export const linter = async (
   }
 
   try {
-    const [ruleset, results] = await lint(JSON.stringify(openapi), {
+    const [ruleset, results] = await lint(event.body, {
       format: OutputFormat.JSON,
       encoding: "utf-8",
       ignoreUnknownFormat: false,
