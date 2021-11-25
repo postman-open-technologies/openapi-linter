@@ -3,7 +3,6 @@ import "source-map-support/register";
 import { URL } from "url";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import contentTypeParser from "content-type-parser";
-import fetch from "node-fetch";
 import yaml from "js-yaml";
 
 import { OutputFormat } from "@stoplight/spectral-cli/dist/services/config";
@@ -50,53 +49,28 @@ export const linter = async (
     "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
 
   try {
-    const rulesetResponse = await fetch(rulesUrl);
-    const rulesetText = (await rulesetResponse.text()) || "";
-    let inputType = "";
-
-    try {
-      JSON.parse(rulesetText);
-      inputType = "json";
-    } catch (_err) {
-      try {
-        yaml.load(rulesetText);
-        inputType = "yaml";
-      } catch (err) {
-        const errorMessage = `Rules URL returned an invalid format, requires JSON or YAML, ${rulesUrl}`;
-        console.error(errorMessage);
-        return {
-          statusCode: 400,
-          body: errorMessage,
-        };
-      }
-    }
-
     // Spectral requires URLs to end in .json, .yaml, or .yml.
-    const testUrl = new URL(rulesUrl);
-    if (inputType === "json" && !rulesUrl.endsWith("json")) {
-      rulesUrl += testUrl.search ? "&hack=.json" : "?hack=.json";
-    } else if (
-      inputType === "yaml" &&
+    if (
+      !rulesUrl.endsWith("json") &&
       !rulesUrl.endsWith("yaml") &&
       !rulesUrl.endsWith("yml")
     ) {
-      rulesUrl += testUrl.search ? "&hack=.yaml" : "?hack=.yaml";
+      // should work for both JSON and YAML.
+      const testUrl = new URL(rulesUrl);
+      rulesUrl += testUrl.search ? "&hack=.json" : "?hack=.yaml";
     }
-
-    const ruleset = await getRuleset(rulesUrl);
   } catch (err) {
-    console.error("cannot load ruleset:", err);
+    console.error("Cannot load ruleset:", err);
     return;
   }
 
   try {
     const [ruleset, results] = await lint(JSON.stringify(openapi), {
-      format: OutputFormat.STYLISH,
+      format: OutputFormat.JSON,
       encoding: "utf-8",
       ignoreUnknownFormat: false,
       failOnUnmatchedGlobs: true,
       ruleset: rulesUrl,
-      stdinFilepath: "./openapi",
     });
 
     const failedCodes = results.map((r) => String(r.code));
@@ -145,13 +119,6 @@ export const linter = async (
       },
       body: JSON.stringify(allResults),
     };
-  } catch (err) {
-    console.error(
-      `Could not load ruleset from ${rulesUrl}, using default. Error: ${err.message}`
-    );
-  }
-
-  try {
   } catch (err) {
     console.error(`Failed to retrieve lint results: ${err.message}`);
     return { statusCode: 500, body: null };
