@@ -1,14 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: openapi-linter
 
-Globals:
-  Api:
-    Cors:
-      AllowMethods: "'GET,POST,OPTIONS'"
-      AllowHeaders: "'content-type'"
-      AllowOrigin: "'*'"
-      AllowCredentials: "'*'"
-
 Transform:
   - AWS::Serverless-2016-10-31
 
@@ -19,6 +11,7 @@ Resources:
       ContentUri: ./
       CompatibleRuntimes:
         - nodejs14.x
+      RetentionPolicy: Retain
     Metadata:
       BuildMethod: makefile
 
@@ -29,6 +22,7 @@ Resources:
       Runtime: nodejs14.x
       Architectures:
         - x86_64
+      Handler: dist/handlers/post-linter.linter
       MemorySize: 128
       Timeout: 100
       Description: Process and return lint results from an OpenAPI document.

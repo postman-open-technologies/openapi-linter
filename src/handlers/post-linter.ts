@@ -1,9 +1,11 @@
 import "source-map-support/register";
 
-import { URL } from "url";
+import fs from "fs/promises";
+import { URL, URLSearchParams } from "url";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import contentTypeParser from "content-type-parser";
 import yaml from "js-yaml";
+import ts from "typescript";
 
 import { OutputFormat } from "@stoplight/spectral-cli/dist/services/config";
 import {
@@ -15,6 +17,7 @@ import {
 import * as Parsers from "@stoplight/spectral-parsers";
 import { getRuleset } from "@stoplight/spectral-cli/dist/services/linter/utils";
 import { ILintConfig } from "@stoplight/spectral-cli/dist/services/config";
+import { fetch } from "@stoplight/spectral-runtime";
 
 export const linter = async (
   event: APIGatewayProxyEvent
@@ -47,20 +50,57 @@ export const linter = async (
     event.queryStringParameters?.rulesUrl ||
     "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
 
-  try {
-    // Spectral requires URLs to end in .json, .yaml, or .yml.
-    if (
-      !rulesUrl.endsWith("json") &&
-      !rulesUrl.endsWith("yaml") &&
-      !rulesUrl.endsWith("yml")
-    ) {
-      // should work for both JSON and YAML.
-      const testUrl = new URL(rulesUrl);
-      rulesUrl += testUrl.search ? "&hack=.json" : "?hack=.yaml";
+  // Spectral requires URLs to end in .json, .yaml, or .yml.
+  const supportedFileExtensions = [
+    ".json",
+    ".yaml",
+    ".yml",
+    ".js",
+    ".mjs",
+    "cjs",
+    ".ts",
+  ];
+  if (!supportedFileExtensions.find((ext) => rulesUrl.endsWith(ext))) {
+    // Should work for both JSON and YAML.
+    // If it's actually JavaScript or TypeScript, ope.
+    const testUrl = new URL(rulesUrl);
+    const spectralHack = "$spectral-hack$";
+
+    const params = new URLSearchParams(testUrl.search);
+    params.append(spectralHack, ".yaml");
+
+    testUrl.search = params.toString();
+    rulesUrl = testUrl.toString();
+  }
+
+  if (rulesUrl.endsWith(".ts")) {
+    // compile to js in /temp and change rulesUrl
+    try {
+      const response = await fetch(rulesUrl);
+      const contents = await response.text();
+      const js = ts.transpileModule(contents, {
+        compilerOptions: {
+          module: ts.ModuleKind.CommonJS,
+        },
+      });
+
+      if (js.diagnostics) {
+        console.log(js.diagnostics);
+      }
+
+      await fs.writeFile("/tmp/.spectral.js", js.outputText);
+      rulesUrl = "/tmp/.spectral.js";
+    } catch (err) {
+      const message = [
+        `Unable to transpile TypeScript into JavaScript from ${rulesUrl}.`,
+        "This is likely an issue with the TypeScript file.",
+      ].join(" ");
+      console.error(message);
+      return {
+        statusCode: 500,
+        body: message,
+      };
     }
-  } catch (err) {
-    console.error("Cannot load ruleset:", err);
-    return;
   }
 
   try {
@@ -119,8 +159,9 @@ export const linter = async (
       body: JSON.stringify(allResults),
     };
   } catch (err) {
-    console.error(`Failed to retrieve lint results: ${err.message}`);
-    return { statusCode: 500, body: null };
+    const message = `Failed to retrieve lint results: ${err.message}`;
+    console.error(message);
+    return { statusCode: 500, body: message };
   }
 };
 
