@@ -1,11 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: openapi-linter
+Description: spec-linter
 
 Transform:
   - AWS::Serverless-2016-10-31
 
 Resources:
-  OpenAPILinterDependenciesLayer:
+  SpecLinterDependenciesLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: ./
@@ -27,12 +27,12 @@ Resources:
       Timeout: 100
       Description: Process and return lint results from an OpenAPI document.
       Layers:
-        - !Ref OpenAPILinterDependenciesLayer
+        - !Ref SpecLinterDependenciesLayer
       Events:
         Api:
           Type: Api
           Properties:
-            Path: /lint/openapi
+            Path: /linter
             Method: POST
     Metadata:
       BuildMethod: makefile

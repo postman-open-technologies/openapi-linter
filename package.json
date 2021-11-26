@@ -1,6 +1,6 @@
 {
-  "name": "openapi-linter",
-  "description": "An OpenAPI linter API.",
+  "name": "spec-linter",
+  "description": "An OpenAPI, AsyncAPI, and JSON/YAML linter API.",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
