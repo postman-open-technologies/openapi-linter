@@ -26,7 +26,11 @@ export const linter = async (
     return { statusCode: 405, body: null };
   }
 
-  const t = contentTypeParser(event.headers["Content-Type"]);
+  for (const key of Object.keys(event.headers)) {
+    event.headers[key.toLowerCase()] = event.headers[key];
+  }
+
+  const t = contentTypeParser(event.headers["content-type"]);
 
   const isValidContent = ["application/json", "text/yaml"].includes(
     `${t?.type}/${t?.subtype}`
