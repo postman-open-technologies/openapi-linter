@@ -9,7 +9,7 @@ type ProblemSubset = {
 export const problems = {
   UNSUPPORTED_METHOD: buildResponse(405, {
     type: buildType("unsupported-method"),
-    title: "Unsupported request body",
+    title: "Unsupported method",
     detail: "This operation only supports the following method: POST",
   }),
   UNSUPPORTED_REQUEST_BODY: buildResponse(415, {
