@@ -1,5 +1,5 @@
-build-postLinter:
-	$(MAKE) HANDLER=src/handlers/post-linter.ts build-lambda-common
+build-linter:
+	$(MAKE) HANDLER=src/handlers/linter.ts build-lambda-common
 
 build-lambda-common:
 	npm install
@@ -15,4 +15,4 @@ build-SpecLinterDependenciesLayer:
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 .PHONY: build-SpecLinterDependenciesLayer
-.PHONY: build-postLinter
+.PHONY: build-linter

@@ -15,14 +15,13 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-  postLinter:
+  linter:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/handlers/post-linter.linter
+      Handler: dist/handlers/linter.handler
       Runtime: nodejs14.x
       Architectures:
         - x86_64
-      Handler: dist/handlers/post-linter.linter
       MemorySize: 128
       Timeout: 100
       Description: Process and return lint results from an OpenAPI document.
@@ -33,7 +32,7 @@ Resources:
           Type: Api
           Properties:
             Path: /linter
-            Method: POST
+            Method: ANY
     Metadata:
       BuildMethod: makefile
 
