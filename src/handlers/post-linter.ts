@@ -19,22 +19,13 @@ import { getRuleset } from "@stoplight/spectral-cli/dist/services/linter/utils";
 import { ILintConfig } from "@stoplight/spectral-cli/dist/services/config";
 import { fetch } from "@stoplight/spectral-runtime";
 
+import { problems } from "../problems";
+
 export const linter = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: {
-        "Content-Type": "application/problem+json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        type: "https://linting.org/api-errors/unsupported-method",
-        title: "Unsupported request body",
-        status: 405,
-        detail: "This operation only supports the following method: POST",
-      }),
-    };
+    return problems.UNSUPPORTED_METHOD;
   }
 
   for (const key of Object.keys(event.headers)) {
@@ -48,38 +39,14 @@ export const linter = async (
   );
 
   if (!event.body || !isValidContent) {
-    return {
-      statusCode: 415,
-      headers: {
-        "Content-Type": "application/problem+json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        type: "https://linting.org/api-errors/unsupported-request-body",
-        title: "Unsupported request body",
-        status: 415,
-        detail:
-          "This operation only supports the following request body media types: application/json, text/yaml",
-      }),
-    };
+    return problems.UNSUPPORTED_REQUEST_BODY;
   }
 
   try {
     yaml.load(event.body); // works with both JSON and YAML.
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
-    return {
-      statusCode: 400,
-      headers: {
-        "Content-Type": "application/problem+json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        type: "https://linting.org/api-errors/invalid-request-body-syntax",
-        title: "Invalid request body syntax",
-        status: 400,
-        detail:
-          "The request body media type is supported, but its syntax is invalid",
-      }),
-    };
+    return problems.INVALID_REQUEST_BODY_SYNTAX;
   }
 
   let rulesUrl =
@@ -120,30 +87,16 @@ export const linter = async (
         },
       });
 
-      if (js.diagnostics) {
+      if (js.diagnostics?.length) {
         console.log(js.diagnostics);
       }
 
       await fs.writeFile("/tmp/.spectral.js", js.outputText);
       rulesUrl = "/tmp/.spectral.js";
     } catch (err) {
-      const message = [
-        `Unable to transpile TypeScript into JavaScript from ${rulesUrl}.`,
-        "This is likely an issue with the TypeScript file.",
-      ].join(" ");
+      const message = `TypeScript compilation error: ${err.message}`;
       console.error(message);
-      return {
-        statusCode: 500,
-        headers: {
-          "Content-Type": "application/problem+json; charset=utf-8",
-        },
-        body: JSON.stringify({
-          type: "https://linting.org/api-errors/typescript-compilation-failure",
-          title: "Failed to compile TypeScript ruleset",
-          status: 500,
-          detail: message,
-        }),
-      };
+      return problems.TYPESCRIPT_COMPILATION_FAILURE;
     }
   }
 
@@ -205,18 +158,7 @@ export const linter = async (
   } catch (err) {
     const message = `Failed to retrieve lint results: ${err.message}`;
     console.error(message);
-    return {
-      statusCode: 500,
-      headers: {
-        "Content-Type": "application/problem+json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        type: "https://linting.org/api-errors/linter-execution-error",
-        title: "Failed to execute linter",
-        status: 500,
-        detail: "Failed to execute linter and retrieve lint results.",
-      }),
-    };
+    return problems.LINTER_EXECUTION_ERROR;
   }
 };
 
