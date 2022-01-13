@@ -21,7 +21,7 @@ import { fetch } from "@stoplight/spectral-runtime";
 
 import { problems } from "../problems";
 
-export const linter = async (
+export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   if (event.httpMethod !== "POST") {
