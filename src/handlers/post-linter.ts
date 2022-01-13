@@ -23,7 +23,18 @@ export const linter = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: null };
+    return {
+      statusCode: 405,
+      headers: {
+        "Content-Type": "application/problem+json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        type: "https://linting.org/api-errors/unsupported-method",
+        title: "Unsupported request body",
+        status: 405,
+        detail: "This operation only supports the following method: POST",
+      }),
+    };
   }
 
   for (const key of Object.keys(event.headers)) {
@@ -37,7 +48,19 @@ export const linter = async (
   );
 
   if (!event.body || !isValidContent) {
-    return { statusCode: 400, body: null };
+    return {
+      statusCode: 415,
+      headers: {
+        "Content-Type": "application/problem+json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        type: "https://linting.org/api-errors/unsupported-request-body",
+        title: "Unsupported request body",
+        status: 415,
+        detail:
+          "This operation only supports the following request body media types: application/json, text/yaml",
+      }),
+    };
   }
 
   try {
@@ -46,7 +69,16 @@ export const linter = async (
     console.error(`Could not parse request body: ${err.message}`);
     return {
       statusCode: 400,
-      body: null,
+      headers: {
+        "Content-Type": "application/problem+json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        type: "https://linting.org/api-errors/invalid-request-body-syntax",
+        title: "Invalid request body syntax",
+        status: 400,
+        detail:
+          "The request body media type is supported, but its syntax is invalid",
+      }),
     };
   }
 
@@ -102,7 +134,15 @@ export const linter = async (
       console.error(message);
       return {
         statusCode: 500,
-        body: message,
+        headers: {
+          "Content-Type": "application/problem+json; charset=utf-8",
+        },
+        body: JSON.stringify({
+          type: "https://linting.org/api-errors/typescript-compilation-failure",
+          title: "Failed to compile TypeScript ruleset",
+          status: 500,
+          detail: message,
+        }),
       };
     }
   }
@@ -165,7 +205,18 @@ export const linter = async (
   } catch (err) {
     const message = `Failed to retrieve lint results: ${err.message}`;
     console.error(message);
-    return { statusCode: 500, body: message };
+    return {
+      statusCode: 500,
+      headers: {
+        "Content-Type": "application/problem+json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        type: "https://linting.org/api-errors/linter-execution-error",
+        title: "Failed to execute linter",
+        status: 500,
+        detail: "Failed to execute linter and retrieve lint results.",
+      }),
+    };
   }
 };
 
