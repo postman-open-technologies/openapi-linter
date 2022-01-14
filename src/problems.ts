@@ -10,7 +10,7 @@ export const problems = {
   UNSUPPORTED_METHOD: buildProblemResponse(405, {
     type: buildProblemType("unsupported-method"),
     title: "Unsupported method",
-    detail: "This operation only supports the following method: POST",
+    detail: "This operation only supports the following methods: POST, OPTIONS",
   }),
   UNSUPPORTED_REQUEST_BODY: buildProblemResponse(415, {
     type: buildProblemType("unsupported-request-body"),
@@ -47,6 +47,7 @@ export function buildProblemResponse(
   problem: ProblemSubset
 ): APIGatewayProxyResult {
   const headers = {
+    "Access-Control-Allow-Origin": "*",
     "Content-Type": "application/problem+json; charset=utf-8",
   };
 
