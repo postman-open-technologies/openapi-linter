@@ -15,27 +15,6 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-  root:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: dist/router.handler
-      Runtime: nodejs14.x
-      Architectures:
-        - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: The router for the API.
-      Layers:
-        - !Ref SpecLinterDependenciesLayer
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /
-            Method: ANY
-    Metadata:
-      BuildMethod: makefile
-
   router:
     Type: AWS::Serverless::Function
     Properties:
@@ -49,7 +28,17 @@ Resources:
       Layers:
         - !Ref SpecLinterDependenciesLayer
       Events:
-        Api:
+        Root:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+        Linter:
+          Type: Api
+          Properties:
+            Path: /linter
+            Method: ANY
+        Default:
           Type: Api
           Properties:
             Path: /{proxy+}
