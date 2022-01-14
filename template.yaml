@@ -15,6 +15,27 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
+  home:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/home.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: The home document for the API.
+      Layers:
+        - !Ref SpecLinterDependenciesLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+    Metadata:
+      BuildMethod: makefile
+
   linter:
     Type: AWS::Serverless::Function
     Properties:
