@@ -57,6 +57,27 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
+  default:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/default.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: The home document for the API.
+      Layers:
+        - !Ref SpecLinterDependenciesLayer
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      BuildMethod: makefile
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
