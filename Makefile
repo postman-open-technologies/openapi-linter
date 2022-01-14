@@ -2,6 +2,8 @@ build-home:
 	$(MAKE) HANDLER=src/handlers/home.ts build-lambda-common
 build-linter:
 	$(MAKE) HANDLER=src/handlers/linter.ts build-lambda-common
+build-default:
+	$(MAKE) HANDLER=src/handlers/default.ts build-lambda-common
 
 build-lambda-common:
 	npm install
@@ -19,3 +21,4 @@ build-SpecLinterDependenciesLayer:
 .PHONY: build-SpecLinterDependenciesLayer
 .PHONY: build-home
 .PHONY: build-linter
+.PHONY: build-default
