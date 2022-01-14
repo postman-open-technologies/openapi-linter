@@ -1,9 +1,7 @@
-build-home:
-	$(MAKE) HANDLER=src/handlers/home.ts build-lambda-common
-build-linter:
-	$(MAKE) HANDLER=src/handlers/linter.ts build-lambda-common
-build-default:
-	$(MAKE) HANDLER=src/handlers/default.ts build-lambda-common
+build-root:
+	$(MAKE) HANDLER=src/router.ts build-lambda-common
+build-router:
+	$(MAKE) HANDLER=src/router.ts build-lambda-common
 
 build-lambda-common:
 	npm install
@@ -19,6 +17,5 @@ build-SpecLinterDependenciesLayer:
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 .PHONY: build-SpecLinterDependenciesLayer
-.PHONY: build-home
-.PHONY: build-linter
-.PHONY: build-default
+.PHONY: build-root
+.PHONY: build-router
