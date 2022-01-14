@@ -30,6 +30,11 @@ export const problems = {
     detail:
       "Unable to transpile TypeScript into JavaScript. This is likely an issue with the TypeScript file.",
   }),
+  INVALID_RULESET_PROVIDED: buildProblemResponse(500, {
+    type: buildProblemType("invalid-ruleset-provided"),
+    title: "Invalid ruleset provided",
+    detail: "The ruleset used for this linter execution is invalid.",
+  }),
   LINTER_EXECUTION_ERROR: buildProblemResponse(500, {
     type: buildProblemType("linter-execution-error"),
     title: "Failed to execute linter",
