@@ -172,6 +172,9 @@ export const handler = async (
   } catch (err) {
     const message = `Failed to retrieve lint results: ${err.message}`;
     console.error(message);
+    if (err.message === "Invalid ruleset provided") {
+      return problems.INVALID_RULESET_PROVIDED;
+    }
     return problems.LINTER_EXECUTION_ERROR;
   }
 };

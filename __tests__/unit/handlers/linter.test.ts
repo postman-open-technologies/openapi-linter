@@ -57,6 +57,27 @@ describe("post linter", () => {
     expect(result).toEqual(problems.INVALID_REQUEST_BODY_SYNTAX);
   });
 
+  it("should return a problem on an invalid ruleset", async () => {
+    const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+    const mockedResponse = {
+      text: jest.fn().mockResolvedValue(Promise.resolve("")),
+    } as jest.MockedFunction<any>;
+    mockFetch.mockResolvedValue(mockedResponse as Response);
+
+    const payload = await fetchProblem("linter-invalid-ruleset-provided");
+    const ev = Object.assign({}, DEFAULT_PROXY_EVENT, payload);
+
+    jest.spyOn(console, "error");
+    const consoleError = console.error as jest.MockedFunction<any>;
+    consoleError.mockImplementation(() => {});
+    const result = await handler(ev);
+    consoleError.mockRestore;
+    mockFetch.mockRestore();
+
+    expect(consoleError).toBeCalled();
+    expect(result).toEqual(problems.INVALID_RULESET_PROVIDED);
+  });
+
   it("should return a problem on a linter execution error", async () => {
     const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
     const mockedResponse = {
@@ -76,7 +97,7 @@ describe("post linter", () => {
     consoleError.mockRestore;
     mockFetch.mockRestore();
 
-    //expect(consoleError).toBeCalled();
+    expect(consoleError).toBeCalled();
     expect(result).toEqual(problems.LINTER_EXECUTION_ERROR);
   });
 });
