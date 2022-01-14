@@ -24,6 +24,19 @@ import { problems } from "../problems";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+      },
+      body: "",
+    };
+  }
+
   if (event.httpMethod !== "POST") {
     return problems.UNSUPPORTED_METHOD;
   }
@@ -151,6 +164,7 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: {
+        "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify(allResults),
