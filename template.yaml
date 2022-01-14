@@ -15,16 +15,16 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-  home:
+  root:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/handlers/home.handler
+      Handler: dist/router.handler
       Runtime: nodejs14.x
       Architectures:
         - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: The home document for the API.
+      Description: The router for the API.
       Layers:
         - !Ref SpecLinterDependenciesLayer
       Events:
@@ -36,37 +36,16 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-  linter:
+  router:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/handlers/linter.handler
+      Handler: dist/router.handler
       Runtime: nodejs14.x
       Architectures:
         - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: Process and return lint results from an OpenAPI document.
-      Layers:
-        - !Ref SpecLinterDependenciesLayer
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /linter
-            Method: ANY
-    Metadata:
-      BuildMethod: makefile
-
-  default:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: dist/handlers/default.handler
-      Runtime: nodejs14.x
-      Architectures:
-        - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: The home document for the API.
+      Description: The router for the API.
       Layers:
         - !Ref SpecLinterDependenciesLayer
       Events:
