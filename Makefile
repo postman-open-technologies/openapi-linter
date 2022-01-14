@@ -1,5 +1,3 @@
-build-root:
-	$(MAKE) HANDLER=src/router.ts build-lambda-common
 build-router:
 	$(MAKE) HANDLER=src/router.ts build-lambda-common
 
@@ -17,5 +15,4 @@ build-SpecLinterDependenciesLayer:
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 .PHONY: build-SpecLinterDependenciesLayer
-.PHONY: build-root
 .PHONY: build-router
