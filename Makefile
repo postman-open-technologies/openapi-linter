@@ -1,3 +1,5 @@
+build-home:
+	$(MAKE) HANDLER=src/handlers/home.ts build-lambda-common
 build-linter:
 	$(MAKE) HANDLER=src/handlers/linter.ts build-lambda-common
 
@@ -15,4 +17,5 @@ build-SpecLinterDependenciesLayer:
 	rm "$(ARTIFACTS_DIR)/nodejs/package.json"
 
 .PHONY: build-SpecLinterDependenciesLayer
+.PHONY: build-home
 .PHONY: build-linter
