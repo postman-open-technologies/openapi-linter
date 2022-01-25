@@ -49,7 +49,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
 
@@ -69,7 +69,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
     mockFetch.mockRestore();
@@ -92,7 +92,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
     mockFetch.mockRestore();

@@ -1,7 +1,7 @@
 build-router:
 	$(MAKE) HANDLER=src/router.ts build-lambda-common
 
-build-lambda-common:
+build-lambda-common: build-SpecLinterDependenciesLayer
 	npm install
 	rm -rf dist
 	echo "{\"extends\": \"./tsconfig.json\", \"include\": [\"${HANDLER}\"] }" > tsconfig-only-handler.json
