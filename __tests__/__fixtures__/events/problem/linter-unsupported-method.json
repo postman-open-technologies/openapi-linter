@@ -1,6 +1,7 @@
 {
   "name": "openapi-body-with-rules-url",
   "httpMethod": "GET",
+  "path": "/linter",
   "headers": {
     "Content-Type": "application/json; charset=utf-8"
   },
