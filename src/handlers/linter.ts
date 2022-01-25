@@ -2,9 +2,15 @@ import "source-map-support/register";
 
 import fs from "fs/promises";
 import { URL, URLSearchParams } from "url";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventHeaders,
+  APIGatewayProxyEventQueryStringParameters,
+  APIGatewayProxyResult,
+} from "aws-lambda";
 import contentTypeParser from "content-type-parser";
 import yaml from "js-yaml";
+import busboy, { FileInfo } from "busboy";
 import ts from "typescript";
 
 import { OutputFormat } from "@stoplight/spectral-cli/dist/services/config";
@@ -20,6 +26,30 @@ import { ILintConfig } from "@stoplight/spectral-cli/dist/services/config";
 import { fetch } from "@stoplight/spectral-runtime";
 
 import { problems } from "../problems";
+import { Readable } from "stream";
+
+class InvalidRequestError extends Error {
+  constructor(err: Error) {
+    super(err.message);
+  }
+}
+
+class TypeScriptCompilationError extends Error {
+  constructor(err: Error) {
+    super(err.message);
+  }
+}
+
+type Definition = {
+  source: string;
+  value: object;
+};
+
+type File = {
+  name: string;
+  info: FileInfo;
+  value: object;
+};
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -47,79 +77,26 @@ export const handler = async (
 
   const t = contentTypeParser(event.headers["content-type"]);
 
-  const isValidContent = ["application/json", "text/yaml"].includes(
-    `${t?.type}/${t?.subtype}`
-  );
+  const isValidContent = [
+    "application/json",
+    "text/yaml",
+    "multipart/form-data",
+  ].includes(`${t?.type}/${t?.subtype}`);
 
   if (!event.body || !isValidContent) {
     return problems.UNSUPPORTED_REQUEST_BODY;
   }
 
   try {
-    yaml.load(event.body); // works with both JSON and YAML.
-  } catch (err) {
-    console.error(`Could not parse request body: ${err.message}`);
-    return problems.INVALID_REQUEST_BODY_SYNTAX;
-  }
+    const rulesetIdentifier = await prepareRuleset(event.queryStringParameters);
+    const definitions = await getDefinitions(t, event.headers, event.body);
 
-  let rulesUrl =
-    event.queryStringParameters?.rulesUrl ||
-    "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
-
-  // Spectral requires URLs to end in .json, .yaml, or .yml.
-  const supportedFileExtensions = [
-    ".json",
-    ".yaml",
-    ".yml",
-    ".js",
-    ".mjs",
-    "cjs",
-    ".ts",
-  ];
-  if (!supportedFileExtensions.find((ext) => rulesUrl.endsWith(ext))) {
-    // Should work for both JSON and YAML.
-    // If it's actually JavaScript or TypeScript, ope.
-    const testUrl = new URL(rulesUrl);
-    const spectralHack = "$spectral-hack$";
-
-    const params = new URLSearchParams(testUrl.search);
-    params.append(spectralHack, ".yaml");
-
-    testUrl.search = params.toString();
-    rulesUrl = testUrl.toString();
-  }
-
-  if (rulesUrl.endsWith(".ts")) {
-    // compile to js in /temp and change rulesUrl
-    try {
-      const response = await fetch(rulesUrl);
-      const contents = await response.text();
-      const js = ts.transpileModule(contents, {
-        compilerOptions: {
-          module: ts.ModuleKind.CommonJS,
-        },
-      });
-
-      if (js.diagnostics?.length) {
-        console.log(js.diagnostics);
-      }
-
-      await fs.writeFile("/tmp/.spectral.js", js.outputText);
-      rulesUrl = "/tmp/.spectral.js";
-    } catch (err) {
-      const message = `TypeScript compilation error: ${err.message}`;
-      console.error(message);
-      return problems.TYPESCRIPT_COMPILATION_FAILURE;
-    }
-  }
-
-  try {
-    const [ruleset, results] = await lint(event.body, {
+    const [ruleset, results] = await lint(definitions, {
       format: OutputFormat.JSON,
       encoding: "utf-8",
       ignoreUnknownFormat: false,
       failOnUnmatchedGlobs: true,
-      ruleset: rulesUrl,
+      ruleset: rulesetIdentifier,
     });
 
     const failedCodes = results.map((r) => String(r.code));
@@ -170,6 +147,16 @@ export const handler = async (
       body: JSON.stringify(allResults),
     };
   } catch (err) {
+    if (err instanceof InvalidRequestError) {
+      console.error(`Could not parse request body: ${err.message}`);
+      return problems.INVALID_REQUEST_BODY_SYNTAX;
+    }
+    if (err instanceof TypeScriptCompilationError) {
+      const message = `TypeScript compilation error: ${err.message}`;
+      console.error(message);
+      return problems.TYPESCRIPT_COMPILATION_FAILURE;
+    }
+
     const message = `Failed to retrieve lint results: ${err.message}`;
     console.error(message);
     if (err.message === "Invalid ruleset provided") {
@@ -180,18 +167,137 @@ export const handler = async (
 };
 
 const lint = async function (
-  source: string,
+  definitions: Definition[],
   flags: ILintConfig
 ): Promise<[Ruleset, IRuleResult[]]> {
   const spectral = new Spectral();
   const ruleset = await getRuleset(flags.ruleset);
   spectral.setRuleset(ruleset);
 
-  const document = new Document(source, Parsers.Yaml, flags.ruleset);
+  const results: IRuleResult[] = [];
 
-  const results: IRuleResult[] = await spectral.run(document, {
-    ignoreUnknownFormat: flags.ignoreUnknownFormat,
-  });
+  for (const definition of definitions) {
+    const document = new Document(
+      JSON.stringify(definition.value),
+      Parsers.Yaml,
+      definition.source
+    );
+    results.push(
+      ...(await spectral.run(document, {
+        ignoreUnknownFormat: flags.ignoreUnknownFormat,
+      }))
+    );
+  }
 
   return [spectral.ruleset, results];
+};
+
+const parseForm = async function (
+  headers: APIGatewayProxyEventHeaders,
+  body: string
+): Promise<File[]> {
+  return new Promise((resolve, reject) => {
+    const bb = busboy({ headers });
+    const results: File[] = [];
+    bb.on("file", (name, file, info) => {
+      const chunks = [];
+      file.on("data", (chunk) => {
+        chunks.push(chunk.toString("utf8"));
+      });
+
+      file.on("close", () => {
+        results.push({ name, info, value: yaml.load(chunks.join()) as object });
+      });
+
+      file.on("error", (err) => {
+        reject(err);
+      });
+    });
+    bb.on("error", (err) => {
+      reject(err);
+    });
+    bb.on("close", () => {
+      resolve(results);
+    });
+    Readable.from(body).pipe(bb);
+  });
+};
+
+const getDefinitions = async (
+  t: { type: string; subtype: string },
+  headers: APIGatewayProxyEventHeaders,
+  body: string
+): Promise<Definition[]> => {
+  try {
+    if (t.type === "multipart" && t.subtype === "form-data") {
+      const results = await parseForm(headers, body);
+      // TODO: Actually check content-types.
+      return results
+        .filter((file) => file.name === "definition")
+        .map((file) => {
+          return {
+            source: file.info.filename,
+            value: file.value,
+          };
+        });
+    } else {
+      return [{ source: "<BODY>", value: yaml.load(body) as object }];
+    }
+  } catch (err) {
+    throw new InvalidRequestError(err);
+  }
+};
+
+const prepareRuleset = async (
+  queryStringParameters?: APIGatewayProxyEventQueryStringParameters
+): Promise<string> => {
+  let rulesUrl =
+    queryStringParameters?.rulesUrl ||
+    "https://rules.linting.org/testing/base.yaml"; // TODO: Accept from env var.
+
+  // Spectral requires URLs to end in .json, .yaml, or .yml.
+  const supportedFileExtensions = [
+    ".json",
+    ".yaml",
+    ".yml",
+    ".js",
+    ".mjs",
+    "cjs",
+    ".ts",
+  ];
+  if (!supportedFileExtensions.find((ext) => rulesUrl.endsWith(ext))) {
+    // Should work for both JSON and YAML.
+    // If it's actually JavaScript or TypeScript, ope.
+    const testUrl = new URL(rulesUrl);
+    const spectralHack = "$spectral-hack$";
+
+    const params = new URLSearchParams(testUrl.search);
+    params.append(spectralHack, ".yaml");
+
+    testUrl.search = params.toString();
+    rulesUrl = testUrl.toString();
+  }
+
+  if (rulesUrl.endsWith(".ts")) {
+    // compile to js in /temp and change rulesUrl
+    try {
+      const response = await fetch(rulesUrl);
+      const contents = await response.text();
+      const js = ts.transpileModule(contents, {
+        compilerOptions: {
+          module: ts.ModuleKind.CommonJS,
+        },
+      });
+
+      if (js.diagnostics?.length) {
+        console.log(js.diagnostics);
+      }
+
+      await fs.writeFile("/tmp/.spectral.js", js.outputText);
+      rulesUrl = "/tmp/.spectral.js";
+    } catch (err) {
+      throw new TypeScriptCompilationError(err);
+    }
+  }
+  return rulesUrl;
 };

@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  version: v0.1.0
+  title: restaurant-components
+paths: []
+components:
+  schemas:
+    RestaurantListing:
+      type: array
+      items:
+        "$ref": "./restaurant-components.yaml#/components/schemas/Restaurant"
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        servesCuisine:
+          description: The cuisine of the restaurant.
+          type: string
+        starRating:
+          description:
+            An official rating for a lodging business or food establishment,
+            e.g. from national associations or standards bodies. Use the author property
+            to indicate the rating organization, e.g. as an Organization with name
+            such as (e.g. HOTREC, DEHOGA, WHR, or Hotelstars).
+          type: object
+          format: starRating
+        menu:
+          description:
+            Either the actual menu as a structured representation, as text,
+            or a URL of the menu.
+          type: string
+        acceptsReservations:
+          description:
+            Indicates whether a FoodEstablishment accepts reservations.
+            Values can be Boolean, an URL at which reservations can be made or (for
+            backwards compatibility) the strings ```Yes``` or ```No```.
+          type: string
+        hasMenu:
+          description:
+            Either the actual menu as a structured representation, as text,
+            or a URL of the menu.
+          type: string
