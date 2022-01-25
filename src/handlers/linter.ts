@@ -21,6 +21,8 @@ import { fetch } from "@stoplight/spectral-runtime";
 
 import { problems } from "../problems";
 
+type Definition = object;
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -55,8 +57,16 @@ export const handler = async (
     return problems.UNSUPPORTED_REQUEST_BODY;
   }
 
+  const definitions: Array<Definition> = [];
   try {
-    yaml.load(event.body); // works with both JSON and YAML.
+    const loaded = yaml.loadAll(event.body); // works with both JSON and YAML.
+    if (!Array.isArray(loaded)) {
+      definitions.push(loaded as Definition);
+    } else if (typeof loaded === "object" && !!loaded) {
+      definitions.push(...loaded);
+    } else {
+      throw new Error("Request body must be an object or array.");
+    }
   } catch (err) {
     console.error(`Could not parse request body: ${err.message}`);
     return problems.INVALID_REQUEST_BODY_SYNTAX;
@@ -114,7 +124,7 @@ export const handler = async (
   }
 
   try {
-    const [ruleset, results] = await lint(event.body, {
+    const [ruleset, results] = await lint(definitions, {
       format: OutputFormat.JSON,
       encoding: "utf-8",
       ignoreUnknownFormat: false,
@@ -180,18 +190,26 @@ export const handler = async (
 };
 
 const lint = async function (
-  source: string,
+  definitions: Definition[],
   flags: ILintConfig
 ): Promise<[Ruleset, IRuleResult[]]> {
   const spectral = new Spectral();
   const ruleset = await getRuleset(flags.ruleset);
   spectral.setRuleset(ruleset);
 
-  const document = new Document(source, Parsers.Yaml, flags.ruleset);
-
-  const results: IRuleResult[] = await spectral.run(document, {
-    ignoreUnknownFormat: flags.ignoreUnknownFormat,
-  });
+  const results: IRuleResult[] = [];
+  for (const definition of definitions) {
+    const document = new Document(
+      JSON.stringify(definition),
+      Parsers.Yaml,
+      "<REQUEST_BODY>"
+    );
+    results.push(
+      ...(await spectral.run(document, {
+        ignoreUnknownFormat: flags.ignoreUnknownFormat,
+      }))
+    );
+  }
 
   return [spectral.ruleset, results];
 };
