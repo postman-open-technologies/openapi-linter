@@ -198,11 +198,11 @@ const lint = async function (
   spectral.setRuleset(ruleset);
 
   const results: IRuleResult[] = [];
-  for (const definition of definitions) {
+  for (const [index, definition] of definitions.entries()) {
     const document = new Document(
       JSON.stringify(definition),
       Parsers.Yaml,
-      "<REQUEST_BODY>"
+      `<REQUEST_BODY_${index}>`
     );
     results.push(
       ...(await spectral.run(document, {
