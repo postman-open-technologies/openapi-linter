@@ -17,27 +17,30 @@ export const DEFAULT_PROXY_EVENT: APIGatewayProxyEvent = {
   resource: null,
 };
 
-export async function fetchSuccess(handler: string) {
-  const fixture = await fetchSuccessFixture(`${handler}.json`);
+export async function fetchValid(scenario: string) {
+  const fixture = await fetchValidFixture(`${scenario}.json`);
   return JSON.parse(fixture);
 }
 
-export async function fetchProblem(problem: string) {
-  const fixture = await fetchProblemFixture(`${problem}.json`);
+export async function fetchProblem(scenario: string) {
+  const fixture = await fetchProblemFixture(`${scenario}.json`);
   return JSON.parse(fixture);
 }
 
 const fixtureRoot = path.join(__dirname, "..", "__fixtures__");
 const eventRoot = path.join(fixtureRoot, "events");
 
-export async function fetchSuccessFixture(fileName: string) {
-  const data = await fs.readFile(path.join(eventRoot, fileName), "utf8");
+export async function fetchValidFixture(fileName: string) {
+  const data = await fs.readFile(
+    path.join(eventRoot, "valid", fileName),
+    "utf8"
+  );
   return data;
 }
 
 export async function fetchProblemFixture(fileName: string) {
   const data = await fs.readFile(
-    path.join(eventRoot, "problems", fileName),
+    path.join(eventRoot, "problem", fileName),
     "utf8"
   );
   return data;

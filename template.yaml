@@ -5,16 +5,6 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Resources:
-  SpecLinterDependenciesLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      ContentUri: ./
-      CompatibleRuntimes:
-        - nodejs14.x
-      RetentionPolicy: Retain
-    Metadata:
-      BuildMethod: makefile
-
   router:
     Type: AWS::Serverless::Function
     Properties:
@@ -25,8 +15,6 @@ Resources:
       MemorySize: 128
       Timeout: 100
       Description: The router for the API.
-      Layers:
-        - !Ref SpecLinterDependenciesLayer
       Events:
         Root:
           Type: Api

@@ -3,7 +3,7 @@ import {
   DEFAULT_PROXY_EVENT,
   fetchProblem,
   fetchRuleset,
-  fetchSuccess,
+  fetchValid,
 } from "../../utils/helpers";
 import fetch, { Response } from "node-fetch";
 import { problems } from "../../../src/problems";
@@ -11,14 +11,30 @@ import { problems } from "../../../src/problems";
 jest.mock("node-fetch");
 
 describe("post linter", () => {
-  it("should return successful results", async () => {
+  it("should return successful results with a single definition", async () => {
     const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
     const mockedResponse = {
       text: jest.fn().mockResolvedValue(fetchRuleset("success.json")),
     } as jest.MockedFunction<any>;
     mockFetch.mockResolvedValue(mockedResponse as Response);
 
-    const payload = await fetchSuccess("linter");
+    const payload = await fetchValid("linter-single");
+    const ev = Object.assign({}, DEFAULT_PROXY_EVENT, payload);
+    const result = await handler(ev);
+    mockFetch.mockRestore();
+
+    expect(mockedResponse.text).toBeCalled();
+    expect(result.statusCode).toEqual(200);
+  });
+
+  it("should return successful results with multiple definitions", async () => {
+    const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+    const mockedResponse = {
+      text: jest.fn().mockResolvedValue(fetchRuleset("success.json")),
+    } as jest.MockedFunction<any>;
+    mockFetch.mockResolvedValue(mockedResponse as Response);
+
+    const payload = await fetchValid("linter-multi");
     const ev = Object.assign({}, DEFAULT_PROXY_EVENT, payload);
     const result = await handler(ev);
     mockFetch.mockRestore();
@@ -49,7 +65,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
 
@@ -69,7 +85,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
     mockFetch.mockRestore();
@@ -92,7 +108,7 @@ describe("post linter", () => {
 
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
-    consoleError.mockImplementation(() => {});
+    consoleError.mockImplementation();
     const result = await handler(ev);
     consoleError.mockRestore;
     mockFetch.mockRestore();
