@@ -1,0 +1,11 @@
+{
+  "include": [],
+  "extends": "./tsconfig.json",
+  "references": [
+    { "path": "./core/tsconfig.build.json" },
+    { "path": "./services/tsconfig.build.json" },
+    { "path": "./infrastructure/aws-lambda/tsconfig.build.json" },
+    { "path": "./infrastructure/azure-function/tsconfig.build.json" },
+    { "path": "./infrastructure/http-server/tsconfig.build.json" }
+  ]
+}

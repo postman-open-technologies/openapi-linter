@@ -4,7 +4,7 @@ import {
   fetchProblem,
   fetchRuleset,
   fetchValid,
-} from "../../utils/helpers";
+} from "../../__utils__/helpers";
 import fetch, { Response } from "node-fetch";
 import { problems } from "../../../src/problems";
 
