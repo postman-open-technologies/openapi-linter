@@ -1,5 +1,3 @@
-import "source-map-support/register";
-
 import fs from "fs/promises";
 import { URL, URLSearchParams } from "url";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";

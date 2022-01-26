@@ -11,7 +11,6 @@
     "aws-sdk": "^2.799.0",
     "content-type-parser": "^1.0.2",
     "js-yaml": "^4.1.0",
-    "source-map-support": "^0.5.21",
     "typescript": "^4.5.2"
   },
   "devDependencies": {
@@ -32,11 +31,15 @@
     "ts-node": "^10.4.0"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --cacheDirectory=.cache/.jest",
     "build": "tsc --build ./tsconfig.build.json",
     "watch": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
     "azure-start": "func start",
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix"
-  }
+  },
+  "workspaces": [
+    "./core",
+    "./infrastructure/*"
+  ]
 }

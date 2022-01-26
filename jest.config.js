@@ -9,14 +9,24 @@ const common = {
       "<rootDir>/node_modules/nimma/dist/cjs/fallbacks/index.js",
     "^nimma/legacy$": "<rootDir>/node_modules/nimma/dist/legacy/cjs/index.js",
   },
+  globals: {
+    "ts-jest": {
+      isolatedModules: true,
+    },
+  },
 };
 
 module.exports = {
   projects: [
     {
       ...common,
-      displayName: { name: "@spec-linter-api/core", color: "greenBright" },
+      displayName: { name: "@spec-linter-api/core", color: "green" },
       testMatch: ["<rootDir>/core/__tests__/**/*.test.ts"],
+    },
+    {
+      ...common,
+      displayName: { name: "@spec-linter-api/core", color: "cyan" },
+      testMatch: ["<rootDir>/infrastructure/aws-lambda/__tests__/**/*.test.ts"],
     },
   ],
 };

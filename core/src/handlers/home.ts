@@ -1,5 +1,3 @@
-import "source-map-support/register";
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { buildProblemResponse, buildProblemType } from "../problems";
 

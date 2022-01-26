@@ -1,5 +1,3 @@
-import "source-map-support/register";
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { handler as linter } from "./handlers/linter";
 import { handler as home } from "./handlers/home";
