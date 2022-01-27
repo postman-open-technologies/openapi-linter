@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@spec-linter-api/core": "^1.0.0",
+    "@spec-linter-api/core": "file:../../core",
     "@stoplight/spectral-cli": "^6.1.0",
     "@stoplight/spectral-core": "^1.6.1",
     "@stoplight/spectral-parsers": "^1.0.1",

@@ -13,3 +13,7 @@ local.settings.json
 __blobstorage__
 __queuestorage__
 __azurite_db*__.json
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out

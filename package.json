@@ -18,7 +18,7 @@
     "@types/aws-lambda": "^8.10.85",
     "@types/jest": "^27.0.3",
     "@types/js-yaml": "^4.0.5",
-    "@types/node": "^16.11.10",
+    "@types/node": "^14.18.3",
     "@types/require-from-string": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
@@ -26,20 +26,20 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.3.1",
+    "lerna": "^4.0.0",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.7",
+    "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0"
   },
   "scripts": {
+    "prepare": "lerna bootstrap",
     "test": "jest --cacheDirectory=.cache/.jest",
     "build": "tsc --build ./tsconfig.build.json",
+    "build.aws-lambda": "tsc --build ./tsconfig.build.aws-lambda.json",
     "watch": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
     "azure-start": "func start",
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix"
-  },
-  "workspaces": [
-    "./core",
-    "./infrastructure/*"
-  ]
+  }
 }

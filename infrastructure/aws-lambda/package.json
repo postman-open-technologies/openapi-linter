@@ -2,8 +2,11 @@
   "name": "@spec-linter-api/aws-lambda",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "preinstall": "npm install --prefix ../../core"
+  },
   "dependencies": {
-    "@spec-linter-api/core": "^1.0.0",
+    "@spec-linter-api/core": "../../core",
     "@stoplight/spectral-cli": "^6.1.0",
     "@stoplight/spectral-core": "^1.6.1",
     "@stoplight/spectral-parsers": "^1.0.1",
