@@ -7,9 +7,6 @@
     "outDir": "dist",
     "tsBuildInfoFile": ".cache/.tsbuildinfo"
   },
-  "references": [
-    {
-      "path": "../../core/tsconfig.build.json"
-    }
-  ]
+  "references": [{ "path": "../../core/tsconfig.build.json" }],
+  "exclude": ["node_modules", "cdk.out"]
 }

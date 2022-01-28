@@ -1,8 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { handler as linter } from "./handlers/linter";
-import { handler as home } from "./handlers/home";
-import { handler as $default } from "./handlers/default";
-
+import { linter, home, $default } from "./handlers";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
