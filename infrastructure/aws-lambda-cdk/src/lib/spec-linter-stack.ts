@@ -5,9 +5,12 @@ export class SpecLinterStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const stageName = this.node.tryGetContext("stagename") || "dev";
-    const apiID: string | undefined = this.node.tryGetContext("apiid");
+    const stackSuffix = this.node.tryGetContext("stackSuffix") || "main";
+    const apiSuffix = this.node.tryGetContext("apiSuffix") || stackSuffix;
+    const stageName =
+      this.node.tryGetContext("stageName") ||
+      (stackSuffix === "main" ? "prod" : "dev");
 
-    createAPI(this, stageName, apiID);
+    createAPI(this, apiSuffix, stageName);
   }
 }

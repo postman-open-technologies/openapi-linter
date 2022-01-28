@@ -1,5 +1,5 @@
 import * as path from "path";
-import { Duration, Stack } from "@aws-cdk/core";
+import { Duration, Names, Stack } from "@aws-cdk/core";
 import {
   Deployment,
   LambdaIntegration,
@@ -7,16 +7,15 @@ import {
   Stage,
 } from "@aws-cdk/aws-apigateway";
 import { Runtime } from "@aws-cdk/aws-lambda";
-import { LogLevel, NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
+import { NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
 
-export const create = (stack: Stack, stageName: string, apiID?: string) => {
-  const api = apiID
-    ? RestApi.fromRestApiId(stack, `spec-linter-${stageName}-api`, apiID)
-    : new RestApi(stack, `spec-linter-${stageName}-api`, {});
+export const create = (stack: Stack, apiSuffix: string, stageName: string) => {
+  const apiName = `spec-linter-api-${apiSuffix}`;
+  const api = new RestApi(stack, apiName, { deploy: false });
 
   const router = new NodejsFunction(
     stack,
-    `spec-linter-${stageName}-router-function`,
+    `spec-linter-function-router-${apiSuffix}-${stageName}`,
     {
       memorySize: 1024,
       timeout: Duration.seconds(30),
@@ -43,16 +42,22 @@ export const create = (stack: Stack, stageName: string, apiID?: string) => {
 
   const deployment = new Deployment(
     stack,
-    `spec-linter-${stageName}-deployment`,
+    `spec-linter-deployment-${apiSuffix}-${stageName}`,
     {
       api,
     }
   );
 
-  const stage = new Stage(stack, `spec-linter-${stageName}-stage`, {
-    stageName,
-    deployment,
-  });
+  const stage = new Stage(
+    stack,
+    `spec-linter-stage-${apiSuffix}-${stageName}`,
+    {
+      stageName,
+      deployment,
+    }
+  );
+
+  api.deploymentStage = stage;
 
   return { api, stage };
 };
