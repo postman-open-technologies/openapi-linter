@@ -18,10 +18,11 @@ import { fetch } from "@stoplight/spectral-runtime";
 import * as errors from "./errors";
 
 type Definition = object;
-export const linter = async (
+
+export async function linter(
   body: string,
   rulesUrl: string | undefined = "https://rules.linting.org/testing/base.yaml"
-): Promise<IRuleResult[]> => {
+): Promise<IRuleResult[]> {
   const definitions: Array<Definition> = [];
   try {
     const loaded = yaml.loadAll(body); // works with both JSON and YAML.
@@ -131,14 +132,12 @@ export const linter = async (
 
     return allResults;
   } catch (err) {
-    const message = `Failed to retrieve lint results: ${err.message}`;
-    console.error(message);
     if (err.message === "Invalid ruleset provided") {
       throw new errors.InvalidRulesetError(err);
     }
     throw new errors.LinterExecutionError(err);
   }
-};
+}
 
 const lint = async function (
   definitions: Definition[],

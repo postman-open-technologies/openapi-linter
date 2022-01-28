@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 
-export const handler = async (): Promise<APIGatewayProxyResult> => {
+export async function handler(): Promise<APIGatewayProxyResult> {
   return {
     statusCode: 404,
     headers: {
@@ -8,4 +8,4 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
     },
     body: "",
   };
-};
+}

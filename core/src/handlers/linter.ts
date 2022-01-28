@@ -1,11 +1,10 @@
 import contentTypeParser from "content-type-parser";
 
-import * as errors from "../services/errors";
 import { linter } from "../services/linter";
 import { buildProblemResponse, problems } from "../problems";
-import { Request, Response } from "../messages";
+import { Request, Response } from "../types";
 
-export const handler = async (request: Request): Promise<Response> => {
+export async function handler(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") {
     return {
       statusCode: 204,
@@ -54,22 +53,17 @@ export const handler = async (request: Request): Promise<Response> => {
   } catch (err) {
     console.error(err.message);
 
-    if (err instanceof errors.SpecSyntaxError) {
-      return buildProblemResponse(problems.INVALID_REQUEST_BODY_SYNTAX);
+    switch (err.name) {
+      case "SpecSyntaxError":
+        return buildProblemResponse(problems.INVALID_REQUEST_BODY_SYNTAX);
+      case "TypeScriptCompilationError":
+        return buildProblemResponse(problems.TYPESCRIPT_COMPILATION_FAILURE);
+      case "InvalidRulesetError":
+        return buildProblemResponse(problems.INVALID_RULESET_PROVIDED);
+      case "LinterExecutionError":
+        return buildProblemResponse(problems.LINTER_EXECUTION_ERROR);
+      default:
+        return buildProblemResponse(problems.INTERNAL_SERVER_ERROR);
     }
-
-    if (err instanceof errors.TypeScriptCompilationError) {
-      return buildProblemResponse(problems.TYPESCRIPT_COMPILATION_FAILURE);
-    }
-
-    if (err instanceof errors.InvalidRulesetError) {
-      return buildProblemResponse(problems.INVALID_RULESET_PROVIDED);
-    }
-
-    if (err instanceof errors.LinterExecutionError) {
-      return buildProblemResponse(problems.LINTER_EXECUTION_ERROR);
-    }
-
-    return buildProblemResponse(problems.INTERNAL_SERVER_ERROR);
   }
-};
+}

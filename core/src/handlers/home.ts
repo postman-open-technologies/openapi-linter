@@ -1,7 +1,7 @@
 import { buildProblemResponse, buildProblemType } from "../problems";
-import { Request, Response } from "../messages";
+import { Request, Response } from "../types";
 
-export const handler = async (event: Request): Promise<Response> => {
+export async function handler(event: Request): Promise<Response> {
   if (event.method === "OPTIONS") {
     return {
       statusCode: 204,
@@ -51,4 +51,4 @@ export const handler = async (event: Request): Promise<Response> => {
       },
     }),
   };
-};
+}

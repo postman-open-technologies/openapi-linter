@@ -1,3 +1,3 @@
 export * as handlers from "./handlers";
-export * from "./messages";
+export * from "./types";
 export * from "./problems";

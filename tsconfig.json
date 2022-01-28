@@ -9,7 +9,7 @@
     "target": "es2019",
     "resolveJsonModule": true,
     "paths": {
-      "@spec-linter-api/core": ["./core/src/core.ts"]
+      "@spec-linter-api/core/*": ["./core/src/*"]
     }
   },
   "exclude": ["node_modules", "**/__*__/**"]

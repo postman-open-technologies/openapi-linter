@@ -1,4 +1,4 @@
-import { Response } from "./messages";
+import { Response } from "./types";
 
 export type Problem = {
   status: number;

@@ -1,28 +1,14 @@
-const common = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  modulePathIgnorePatterns: ["<rootDir>/.aws-sam"],
-  moduleNameMapper: {
-    "^@stoplight/spectral-ruleset-bundler/(.*)":
-      "<rootDir>/node_modules/@stoplight/spectral-ruleset-bundler/dist/$1",
-    "^nimma/fallbacks$":
-      "<rootDir>/node_modules/nimma/dist/cjs/fallbacks/index.js",
-    "^nimma/legacy$": "<rootDir>/node_modules/nimma/dist/legacy/cjs/index.js",
-  },
-  globals: {
-    "ts-jest": {
-      isolatedModules: true,
-    },
-  },
-};
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const common = require("./jest.common");
 
 module.exports = {
+  rootDir: "../../",
   projects: [
-    {
-      ...common,
-      displayName: { name: "@spec-linter-api/core", color: "green" },
-      testMatch: ["<rootDir>/core/__tests__/**/*.test.ts"],
-    },
+    // {
+    //   ...common,
+    //   displayName: { name: "@spec-linter-api/core", color: "green" },
+    //   testMatch: ["<rootDir>/core/__tests__/**/*.test.ts"],
+    // },
     {
       ...common,
       displayName: { name: "@spec-linter-api/aws-lambda", color: "cyan" },

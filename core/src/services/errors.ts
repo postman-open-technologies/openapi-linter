@@ -32,8 +32,9 @@ export class InvalidRulesetError extends Error {
 
 export class LinterExecutionError extends Error {
   constructor(err: Error) {
-    super(err.message);
+    const message = `Failed to retrieve lint results: ${err.message}`;
+    super(message);
     this.stack = err.stack;
-    this.name = "InvalidRulesetError";
+    this.name = "LinterExecutionError";
   }
 }

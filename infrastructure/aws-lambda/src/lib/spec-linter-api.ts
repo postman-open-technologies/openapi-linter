@@ -9,7 +9,11 @@ import {
 import { Runtime } from "@aws-cdk/aws-lambda";
 import { NodejsFunction } from "@aws-cdk/aws-lambda-nodejs";
 
-export const create = (stack: Stack, apiSuffix: string, stageName: string) => {
+export function create(
+  stack: Stack,
+  apiSuffix: string,
+  stageName: string
+): { api: RestApi; stage: Stage } {
   const apiName = `spec-linter-api-${apiSuffix}`;
   const api = new RestApi(stack, apiName, { deploy: false });
 
@@ -60,4 +64,4 @@ export const create = (stack: Stack, apiSuffix: string, stageName: string) => {
   api.deploymentStage = stage;
 
   return { api, stage };
-};
+}
