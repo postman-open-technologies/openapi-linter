@@ -1,10 +1,8 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { buildProblemResponse, buildProblemType } from "../problems";
+import { Request, Response } from "../messages";
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  if (event.httpMethod === "OPTIONS") {
+export const handler = async (event: Request): Promise<Response> => {
+  if (event.method === "OPTIONS") {
     return {
       statusCode: 204,
       headers: {
@@ -16,8 +14,9 @@ export const handler = async (
     };
   }
 
-  if (event.httpMethod !== "GET") {
-    return buildProblemResponse(405, {
+  if (event.method !== "GET") {
+    return buildProblemResponse({
+      status: 405,
       type: buildProblemType("unsupported-method"),
       title: "Unsupported method",
       detail:
