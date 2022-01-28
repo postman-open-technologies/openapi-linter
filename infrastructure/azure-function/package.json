@@ -2,15 +2,27 @@
   "name": "@spec-linter-api/azure-function",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
+  "main": "./dist/router.js",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json",
+    "watch": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
+    "test": "jest --cacheDirectory=./.cache/.jest"
+  },
+  "devDependencies": {
+    "@azure/functions": "^3.0.0",
     "@spec-linter-api/core": "file:../../core",
-    "@stoplight/spectral-cli": "^6.1.0",
-    "@stoplight/spectral-core": "^1.6.1",
-    "@stoplight/spectral-parsers": "^1.0.1",
-    "@stoplight/spectral-runtime": "^1.1.0",
-    "aws-sdk": "^2.799.0",
-    "content-type-parser": "^1.0.2",
-    "js-yaml": "^4.1.0",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^14.18.3",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
     "typescript": "^4.5.2"
-  }
+  },
+  "dependencies": {}
 }

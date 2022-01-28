@@ -5,10 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
+      "route": "{*proxy}"
     },
     {
       "type": "http",
@@ -16,5 +13,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/OpenAPILinter/index.js"
+  "scriptFile": "../dist/router.js"
 }

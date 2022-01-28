@@ -27,6 +27,7 @@ export function create(
       entry: path.resolve(__dirname, "../resources/router.ts"),
       bundling: {
         minify: true,
+        sourceMap: true,
 
         // this is because of jsonc-parser
         // https://github.com/evanw/esbuild/issues/1619#issuecomment-922787629
