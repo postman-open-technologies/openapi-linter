@@ -13,5 +13,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/router.js"
+  "scriptFile": "./dist/router.js"
 }
