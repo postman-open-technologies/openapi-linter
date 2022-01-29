@@ -6,6 +6,7 @@ const handler: AzureFunction = async (
   context: Context,
   req: HttpRequest
 ): Promise<void> => {
+  context.log("in it");
   const url = new URL(req.url);
   switch (url.pathname) {
     case "/api/linter":

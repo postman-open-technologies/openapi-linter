@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["./spec-linter-api/src"],
+  "include": ["spec-linter-api"],
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./spec-linter-api/src",
-    "outDir": "./spec-linter-api/dist",
+    "rootDir": ".",
+    "outDir": "dist",
     "tsBuildInfoFile": ".cache/.tsbuildinfo"
   },
   "references": [{ "path": "../../core/tsconfig.build.json" }],
