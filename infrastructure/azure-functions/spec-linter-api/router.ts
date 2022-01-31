@@ -6,19 +6,16 @@ const handler: AzureFunction = async (
   context: Context,
   req: HttpRequest
 ): Promise<void> => {
-  context.log("in it");
   const url = new URL(req.url);
   switch (url.pathname) {
     case "/api/linter":
-      linter(context, req);
+      await linter(context, req);
       break;
     case "/api":
-      home(context, req);
-      console.log(context.res);
+      await home(context, req);
       break;
     default:
-      $default(context);
-      console.log(context.res);
+      await $default(context);
   }
 };
 
