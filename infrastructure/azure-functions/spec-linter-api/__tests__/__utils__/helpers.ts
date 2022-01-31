@@ -12,11 +12,11 @@ export async function fetchProblem(scenario: string) {
 }
 
 const fixtureRoot = path.join(__dirname, "..", "__fixtures__");
-const eventRoot = path.join(fixtureRoot, "events");
+const requestRoot = path.join(fixtureRoot, "requests");
 
 export async function fetchValidFixture(fileName: string) {
   const data = await fs.readFile(
-    path.join(eventRoot, "valid", fileName),
+    path.join(requestRoot, "valid", fileName),
     "utf8"
   );
   return data;
@@ -24,7 +24,7 @@ export async function fetchValidFixture(fileName: string) {
 
 export async function fetchProblemFixture(fileName: string) {
   const data = await fs.readFile(
-    path.join(eventRoot, "problem", fileName),
+    path.join(requestRoot, "problem", fileName),
     "utf8"
   );
   return data;
