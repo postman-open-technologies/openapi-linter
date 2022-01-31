@@ -1,9 +1,9 @@
-import { handler } from "../../handlers/linter";
-import { fetchProblem, fetchRuleset, fetchValid } from "../__utils__/helpers";
+import router from "../router";
+import { fetchProblem, fetchRuleset, fetchValid } from "./__utils__/helpers";
 import fetch, { Response } from "@spec-linter-api/core/node_modules/node-fetch";
 import { buildProblemResponse, problems } from "@spec-linter-api/core";
 import { Context } from "@azure/functions";
-import { adapter as responseAdapter } from "../../response-adapter";
+import { adapter as responseAdapter } from "../response-adapter";
 
 jest.mock("@spec-linter-api/core/node_modules/node-fetch");
 
@@ -21,7 +21,7 @@ describe("post linter", () => {
     mockFetch.mockResolvedValue(mockedResponse as Response);
 
     const request = await fetchValid("linter-single");
-    await handler(context, request);
+    await router(context, request);
     mockFetch.mockRestore();
 
     expect(context.res.status).toEqual(200);
@@ -37,7 +37,7 @@ describe("post linter", () => {
     mockFetch.mockResolvedValue(mockedResponse as Response);
 
     const request = await fetchValid("linter-multi");
-    await handler(context, request);
+    await router(context, request);
     mockFetch.mockRestore();
 
     expect(context.res.status).toEqual(200);
@@ -47,7 +47,7 @@ describe("post linter", () => {
   it("should return a problem on an unsupported method", async () => {
     const context = { res: {} } as Context;
     const request = await fetchProblem("linter-unsupported-method");
-    await handler(context, request);
+    await router(context, request);
 
     expect(context.res).toEqual(
       adaptedProblemResponse(problems.UNSUPPORTED_METHOD)
@@ -57,7 +57,7 @@ describe("post linter", () => {
   it("should return a problem on an unsupported request body", async () => {
     const context = { res: {} } as Context;
     const request = await fetchProblem("linter-unsupported-request-body");
-    await handler(context, request);
+    await router(context, request);
 
     expect(context.res).toEqual(
       adaptedProblemResponse(problems.UNSUPPORTED_REQUEST_BODY)
@@ -71,7 +71,7 @@ describe("post linter", () => {
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
     consoleError.mockImplementation();
-    await handler(context, request);
+    await router(context, request);
     consoleError.mockRestore;
 
     expect(consoleError).toBeCalled();
@@ -93,7 +93,7 @@ describe("post linter", () => {
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
     consoleError.mockImplementation();
-    await handler(context, request);
+    await router(context, request);
     consoleError.mockRestore;
     mockFetch.mockRestore();
 
@@ -118,7 +118,7 @@ describe("post linter", () => {
     jest.spyOn(console, "error");
     const consoleError = console.error as jest.MockedFunction<any>;
     consoleError.mockImplementation();
-    await handler(context, request);
+    await router(context, request);
     consoleError.mockRestore;
     mockFetch.mockRestore();
 

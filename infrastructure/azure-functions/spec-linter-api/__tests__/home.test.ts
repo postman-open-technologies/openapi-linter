@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import router from "../../router";
+import router from "../router";
 
 describe("home", () => {
   it("the root path should return a JSON Home document", async () => {

@@ -1,4 +1,4 @@
-import { handler } from "../../src/resources/handlers/linter";
+import { handler } from "../../src/resources/router";
 import {
   DEFAULT_PROXY_EVENT,
   fetchProblem,
