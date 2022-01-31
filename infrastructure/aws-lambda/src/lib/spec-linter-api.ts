@@ -1,5 +1,5 @@
 import * as path from "path";
-import { Duration, Names, Stack } from "@aws-cdk/core";
+import { Duration, Stack } from "@aws-cdk/core";
 import {
   Deployment,
   LambdaIntegration,

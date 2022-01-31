@@ -4,7 +4,7 @@ dist
 .cache
 
 # Azure Functions artifacts
-infrastructure/azure-function/**/bin
+infrastructure/azure-functions/**/bin
 obj
 appsettings.json
 local.settings.json
