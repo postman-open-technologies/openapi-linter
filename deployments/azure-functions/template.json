@@ -5,7 +5,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2021-06-01",
-      "name": "[format('{0}{1}', take(replace(deployment().name, '-', ''), 10), uniqueString(resourceGroup().id))]",
+      "name": "[format('speclinter{1}', uniqueString(resourceGroup().id))]",
       "location": "[resourceGroup().location]",
       "sku": {
         "name": "Standard_LRS"
@@ -15,7 +15,7 @@
     {
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
-      "name": "[deployment().name]",
+      "name": "spec-linter-api",
       "location": "[resourceGroup().location]",
       "kind": "web",
       "properties": {
@@ -25,11 +25,11 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
-      "name": "[deployment().name]",
+      "name": "spec-linter-api",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/components', deployment().name)]",
-        "[resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', take(replace(deployment().name, '-', ''), 10), uniqueString(resourceGroup().id)))]"
+        "[resourceId('Microsoft.Insights/components', 'spec-linter-api')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', format('speclinter{1}', uniqueString(resourceGroup().id)))]"
       ],
       "kind": "functionapp,linux",
       "properties": {
@@ -39,7 +39,7 @@
           "appSettings": [
             {
               "name": "AzureWebJobsStorage",
-              "value": "[format('DefaultEndpointsProtocol=https;EndpointSuffix={0};AccountName={1};AccountKey={2}', environment().suffixes.storage, format('{0}{1}', take(replace(deployment().name, '-', ''), 10), uniqueString(resourceGroup().id)), listKeys(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}', take(replace(deployment().name, '-', ''), 10), uniqueString(resourceGroup().id))), '2021-06-01').keys[0].value)]"
+              "value": "[format('DefaultEndpointsProtocol=https;EndpointSuffix={0};AccountName={1};AccountKey={2}', environment().suffixes.storage, format('speclinter{1}', uniqueString(resourceGroup().id)), listKeys(resourceId('Microsoft.Storage/storageAccounts', format('speclinter{1}', uniqueString(resourceGroup().id))), '2021-06-01').keys[0].value)]"
             },
             {
               "name": "FUNCTION_WORKERS_RUNTIME",
@@ -55,7 +55,7 @@
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components', deployment().name)).InstrumentationKey]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', 'spec-linter-api')).InstrumentationKey]"
             },
             {
               "name": "WEBSITE_RUN_FROM_PACKAGE",
