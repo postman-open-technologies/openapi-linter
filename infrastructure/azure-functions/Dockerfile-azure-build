@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/azure-functions/node:4-node14-slim
+
+COPY . /home/site/wwwroot
+
+RUN apt-get install zip -y
+RUN cd /home/site/wwwroot/infrastructure/azure-functions && \
+    npm ci && \
+    npm run build
+RUN mkdir /home/build && \
+    cd /home/site/wwwroot/infrastructure/azure-functions && \
+    zip \
+        /home/build/spec-linter-api.zip \
+        host.json \
+        spec-linter-api/function.json \
+        build/spec-linter-api/*

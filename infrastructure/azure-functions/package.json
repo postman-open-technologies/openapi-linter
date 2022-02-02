@@ -6,9 +6,9 @@
   "scripts": {
     "build": "npm run build:tsc && npm run build:esbuild",
     "build:tsc": "tsc --build ./tsconfig.build.json",
-    "build:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/spec-linter-api/router.js --tsconfig=./tsconfig.build.json ./spec-linter-api/router.ts",
+    "build:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/spec-linter-api/router.js --tsconfig=./tsconfig.build.json --sourcemap ./spec-linter-api/router.ts",
     "watch:tsc": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
-    "watch:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/spec-linter-api/router.js --tsconfig=./tsconfig.build.json --watch ./spec-linter-api/router.ts",
+    "watch:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/spec-linter-api/router.js --tsconfig=./tsconfig.build.json --sourcemap --watch ./spec-linter-api/router.ts",
     "test": "jest --cacheDirectory=./.cache/.jest"
   },
   "devDependencies": {
