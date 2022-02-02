@@ -1,6 +1,8 @@
 # spec-linter
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpostman-open-technologies%2Fopenapi-linter%2Fmulticloud%2Fdeployments%2Fazure-functions%2Ftemplate.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpostman-open-technologies%2Fopenapi-linter%2Fmain%2Fdeployments%2Fazure-functions%2Ftemplate.json)
+
+[Deploy to AWS](https://us-east-2.console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/create/template?stackName=spec-linter-api&templateURL=https://public-spec-linter-api.s3.us-east-2.amazonaws.com/template.json)
 
 An API for linting OpenAPI, AsyncAPI, and other JSON/YAML documents, built on top of [Spectral](https://github.com/stoplightio/spectral).
 
