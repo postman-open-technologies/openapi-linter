@@ -1,6 +1,12 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "[format('spec-linter-api-{0}', uniqueString(resourceGroup().id))]"
+    }
+  },
   "resources": [
     {
       "type": "Microsoft.Storage/storageAccounts",
@@ -15,7 +21,7 @@
     {
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
-      "name": "spec-linter-api",
+      "name": "[parameters('name')]",
       "location": "[resourceGroup().location]",
       "kind": "web",
       "properties": {
@@ -25,10 +31,10 @@
     {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
-      "name": "spec-linter-api",
+      "name": "[parameters('name')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/components', 'spec-linter-api')]",
+        "[resourceId('Microsoft.Insights/components', parameters('name'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', format('speclinter{0}', uniqueString(resourceGroup().id)))]"
       ],
       "kind": "functionapp,linux",
@@ -55,7 +61,7 @@
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components', 'spec-linter-api')).InstrumentationKey]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('name'))).InstrumentationKey]"
             },
             {
               "name": "WEBSITE_RUN_FROM_PACKAGE",
