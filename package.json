@@ -1,39 +1,29 @@
 {
-  "name": "spec-linter",
+  "name": "spec-linter-api",
   "description": "An OpenAPI, AsyncAPI, and JSON/YAML linter API.",
   "version": "0.0.1",
   "private": true,
-  "dependencies": {
-    "@stoplight/spectral-cli": "^6.1.0",
-    "@stoplight/spectral-core": "^1.6.1",
-    "@stoplight/spectral-parsers": "^1.0.1",
-    "@stoplight/spectral-runtime": "^1.1.0",
-    "aws-sdk": "^2.799.0",
-    "content-type-parser": "^1.0.2",
-    "js-yaml": "^4.1.0",
-    "source-map-support": "^0.5.21",
-    "typescript": "^4.5.2"
-  },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.85",
     "@types/jest": "^27.0.3",
     "@types/js-yaml": "^4.0.5",
-    "@types/node": "^16.11.10",
-    "@types/require-from-string": "^1.2.1",
+    "@types/node": "^14.18.3",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.3.1",
+    "lerna": "^4.0.0",
     "prettier": "^2.4.1",
     "ts-jest": "^27.0.7",
-    "ts-node": "^10.4.0"
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
   },
   "scripts": {
-    "test": "jest",
-    "build": "node_modules/typescript/bin/tsc",
-    "watch": "node_modules/typescript/bin/tsc -w --preserveWatchOutput",
+    "prepare": "lerna bootstrap",
+    "test": "jest --cacheDirectory=.cache/.jest",
+    "build": "tsc --build ./tsconfig.build.json",
+    "watch:tsc": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix"
   }

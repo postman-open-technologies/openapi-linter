@@ -1,0 +1,13 @@
+*.js.map
+*/*.ts
+*/**/*.ts
+.git*
+.vscode
+local.settings.json
+test
+.cache
+node_modules
+dist
+package-lock.json
+package.json
+tsconfig.build.json

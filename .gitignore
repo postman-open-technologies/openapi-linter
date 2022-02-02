@@ -1,3 +1,19 @@
 .aws-sam
 node_modules
-/dist
+dist
+.cache
+
+# Azure Functions artifacts
+infrastructure/azure-functions/**/bin
+obj
+appsettings.json
+local.settings.json
+
+# Azurite artifacts
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out

@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "sourceMap": true,
     "esModuleInterop": true,
-    "allowJs": true,
-    "checkJs": true,
     "moduleResolution": "node",
     "module": "commonjs",
     "lib": ["es2020"],
     "target": "es2019",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@spec-linter-api/core/*": ["./core/src/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.js"]
+  "exclude": ["node_modules", "**/__*__/**"]
 }

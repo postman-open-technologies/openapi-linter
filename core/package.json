@@ -1,0 +1,16 @@
+{
+  "name": "@spec-linter-api/core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/core.js",
+  "types": "dist/core.d.ts",
+  "dependencies": {
+    "@stoplight/spectral-cli": "^6.1.0",
+    "@stoplight/spectral-core": "^1.6.1",
+    "@stoplight/spectral-parsers": "^1.0.1",
+    "@stoplight/spectral-runtime": "^1.1.0",
+    "content-type-parser": "^1.0.2",
+    "js-yaml": "^4.1.0",
+    "typescript": "^4.5.2"
+  }
+}

@@ -1,0 +1,18 @@
+import { RulesetFunctionWithValidator } from "@stoplight/spectral-core";
+import { truthy } from "@stoplight/spectral-functions";
+
+const t: RulesetFunctionWithValidator<unknown, null> = truthy;
+export default {
+  extends: [oas],
+  rules: {
+    "no-empty-description": {
+      message: "Description must not be empty",
+      given: "$..description",
+      then: [
+        {
+          function: t,
+        },
+      ],
+    },
+  },
+};
