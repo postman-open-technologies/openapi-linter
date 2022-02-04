@@ -1,0 +1,34 @@
+{
+  "name": "@spec-linter-api/server",
+  "version": "0.1.0",
+  "main": "./build/server.js",
+  "scripts": {
+    "build": "npm run build:tsc && npm run build:esbuild",
+    "build:tsc": "tsc --build ./tsconfig.build.json",
+    "build:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/server.js --tsconfig=./tsconfig.build.json --sourcemap --minify ./src/server.ts",
+    "watch:tsc": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
+    "watch:esbuild": "esbuild --bundle --platform=node --format=cjs --main-fields=module,main --outfile=build/server.js --tsconfig=./tsconfig.build.json --sourcemap --watch ./src/server.ts",
+    "test": "jest --cacheDirectory=./.cache/.jest",
+    "start": "node ./dist/server.js"
+  },
+  "devDependencies": {
+    "@spec-linter-api/core": "file:../../core",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^14.18.3",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "esbuild": "^0.14.14",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.3.1",
+    "prettier": "^2.4.1",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@spec-linter-api/core": "file:../../core",
+    "fastify": "^3.27.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "spec-linter-api",
+  "description": "An OpenAPI, AsyncAPI, and JSON linter API.",
+  "success_url": "/",
+  "website": "https://github.com/postman-open-technologies/openapi-linter",
+  "repository": "https://github.com/postman-open-technologies/openapi-linter",
+  "keywords": ["OpenAPI", "AsyncAPI", "Spectral", "lint", "linter"],
+  "stack": "container"
+}
