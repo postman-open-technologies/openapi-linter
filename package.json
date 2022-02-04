@@ -9,6 +9,7 @@
     "@types/node": "^14.18.3",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
+    "esbuild": "^0.14.18",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -22,7 +23,8 @@
   "scripts": {
     "prepare": "lerna bootstrap",
     "test": "jest --cacheDirectory=.cache/.jest",
-    "build": "tsc --build ./tsconfig.build.json",
+    "build": "tsc --build ./tsconfig.build.json && lerna run build",
+    "start": "npm run start --prefix=./infrastructure/server",
     "watch:tsc": "tsc --build ./tsconfig.build.json -w --preserveWatchOutput",
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix"

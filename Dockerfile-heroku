@@ -1,0 +1,13 @@
+FROM node:14.19.0-alpine
+
+EXPOSE 3000
+RUN mkdir -p /app/build/infrastructure
+COPY tsconfig.* /app/build/
+COPY ./infrastructure/server /app/build/infrastructure/server
+COPY ./core /app/build/core
+RUN cd /app/build/infrastructure/server && \
+  npm ci && \
+  npm run build
+RUN cp /app/build/infrastructure/server/build/* /app/ && \
+  rm -rf /app/build
+CMD ["node", "/app/server.js"]
