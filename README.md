@@ -9,7 +9,7 @@ An API for linting OpenAPI, AsyncAPI, and other JSON/YAML documents, built on to
 
 ## 🛠 Usage
 
-See the published [Postman Collection](https://postman.postman.co/workspace/OpenAPI-Linting~f8227475-4001-406c-b048-78ab9035ae1d/documentation/12959542-93cd90de-9f3c-4ed0-9c57-cc5a7712cf19) for more information on interacting with the spec-linter API.
+See the published [Postman Collection](https://www.postman.com/postman/workspace/openapi-linting/documentation/12959542-93cd90de-9f3c-4ed0-9c57-cc5a7712cf19) for more information on interacting with the spec-linter API.
 
 Spectral config must be hosted at a URL. This API supports configuration in the following forms:
 
